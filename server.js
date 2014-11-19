@@ -1,39 +1,12 @@
 var http = require("http");
+var request = require('request');
 var fs = require('fs');
 var path = require('path');
 
 
-// Utility function that downloads a URL and invokes
-// callback with the data.
-function download(url, callback) {
-  http.get(url, function(res) {
-    var data = "";
-    res.on('data', function (chunk) {
-      data += chunk;
-    });
-   res.on("end", function() {
-      callback(data);
-    });
-  }).on("error", function() {
-    callback(null);
-  });
-}
-
-
 var cheerio = require("cheerio");
-
-
-
 var express = require('express');
 
-/*
- * body-parser is a piece of express middleware that 
- *   reads a form's input and stores it as a javascript
- *   object accessible through `req.body` 
- *
- * 'body-parser' must be installed (via `npm install --save body-parser`)
- * For more info see: https://github.com/expressjs/body-parser
- */
 var bodyParser = require('body-parser');
 
 // create our app
@@ -64,10 +37,13 @@ app.post('/', function(req, res){
   var Patern = req.body.Pattern;
   console.log(URL);
   
-          download(URL, function(data) {
-            if (data) {
+          request(URL, function (error, response, html) {
+            if (!error && response.statusCode == 200) {
+           
+  
+        
           //    console.log(data);
-              var $ = cheerio.load(data);
+              var $ = cheerio.load(html);
               var myresponse = 'Responses:<br>';
               
               $(Patern).each(function() {
@@ -76,11 +52,9 @@ app.post('/', function(req, res){
               });
               
               res.send(myresponse);
-           }
-            else console.log("error");  
-          });
-  
-
+         
+            }
+           });
 });
 
 app.listen(8080);
