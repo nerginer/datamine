@@ -37,24 +37,47 @@ app.post('/', function(req, res){
   var Patern = req.body.Pattern;
   console.log(URL);
   
-          request(URL, function (error, response, html) {
-            if (!error && response.statusCode == 200) {
+              request({
+              uri: URL,
+              method: "GET",
+              timeout: 1000,
+              followRedirect: true,
+              maxRedirects: 10
+            }, function(error, response, body) {
+                     if (!error && response.statusCode == 200) {
+                   
+          
+                
+                  //    console.log(data);
+                      var $ = cheerio.load(body);
+                      var myresponse = 'Responses:<br>';
+                      
+                      $(Patern).each(function() {
+                       //    console.log($(this).text());
+                          myresponse = myresponse + $(this).text()+'<br>';
+                      });
+                      
+                      res.send(myresponse);
+                 
+                    } 
+                    else {
+                        res.send('unexpected error no:001');
+                        request.end();
+                    }
+                    
+    /*                request.on('error', function(e) {
+                        console.error('error');
+                        console.error(e);
+                        request.end(); 
+                    });
+*/
+              
+            });
+  
            
   
+  
         
-          //    console.log(data);
-              var $ = cheerio.load(html);
-              var myresponse = 'Responses:<br>';
-              
-              $(Patern).each(function() {
-               //    console.log($(this).text());
-                  myresponse = myresponse + $(this).text()+'<br>';
-              });
-              
-              res.send(myresponse);
-         
-            }
-           });
 });
 
 app.listen(8080);
